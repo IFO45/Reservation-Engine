@@ -16,11 +16,15 @@ async def init_resources():
         max_size=50,
         command_timeout=10.0
     )
-    state.redis_client = aioredis.from_url(
+    
+    # Use a blocking pool to queue requests instead of dropping them
+    redis_pool = aioredis.BlockingConnectionPool.from_url(
         REDIS_URL,
-        decode_responses=True,
-        max_connections=50
+        max_connections=100,
+        timeout=10, # Seconds a request will wait for a free connection
+        decode_responses=True
     )
+    state.redis_client = aioredis.Redis(connection_pool=redis_pool)
 
 async def close_resources():
     if state.redis_client:

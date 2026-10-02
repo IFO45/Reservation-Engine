@@ -43,8 +43,8 @@ CREATE TABLE IF NOT EXISTS idempotency_keys (
     key VARCHAR(255) PRIMARY KEY,
     user_id UUID NOT NULL,
     request_hash VARCHAR(64) NOT NULL,
-    response_body JSONB NOT NULL,
-    status_code INT NOT NULL,
+    response_body JSONB NULL,
+    status_code INT NULL,
     created_at TIMESTAMP WITH TIME ZONE DEFAULT NOW(),
     expires_at TIMESTAMP WITH TIME ZONE NOT NULL
 );

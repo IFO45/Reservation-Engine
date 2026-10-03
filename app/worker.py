@@ -25,17 +25,22 @@ async def reconciliation_loop():
                         """
                     )
 
-                    if expired_rows:
-                        # Restore available count in Redis
-                        pipeline = state.redis_client.pipeline()
-                        for row in expired_rows:
-                            event_key = f"event:{row['event_id']}:available"
-                            pipeline.incrby(event_key, row["seats"])
-                            logger.info(
-                                f"Restored {row['seats']} seats for event {row['event_id']} "
-                                f"(reservation {row['id']})"
-                            )
-                        await pipeline.execute()
+            if expired_rows:
+                # Restore available count in Redis
+                pipeline = state.redis_client.pipeline()
+                for row in expired_rows:
+                    event_key = f"event:{row['event_id']}:available"
+                    pipeline.incrby(event_key, row["seats"])
+                    logger.info(
+                        f"Restored {row['seats']} seats for event {row['event_id']} "
+                        f"(reservation {row['id']})"
+                    )
+                await pipeline.execute()
+                for row in expired_rows:
+                    logger.info(
+                        f"Restored {row['seats']} seats for event {row['event_id']} "
+                        f"(reservation {row['id']})"
+                    )
 
         except asyncio.CancelledError:
             logger.info("Reconciliation worker received cancellation request.")

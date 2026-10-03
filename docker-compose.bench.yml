@@ -1,0 +1,12 @@
+# Benchmark-only override.
+#   - enables the /bench/* baseline routes
+#   - runs Uvicorn WITHOUT --reload (reload mode slows the server down)
+#   - turns off per-request access logs
+# Usage:
+#   docker compose -f docker-compose.yml -f docker-compose.bench.yml up --build -d
+# Check that the module path below matches the CMD in your Dockerfile.
+services:
+  api:
+    environment:
+      ENABLE_BENCH_ROUTES: "1"
+    command: uvicorn app.main:app --host 0.0.0.0 --port 8000 --no-access-log

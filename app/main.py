@@ -33,7 +33,10 @@ async def lifespan(app: FastAPI):
 
 
 app = FastAPI(title="High-Concurrency Reservation Engine", lifespan=lifespan)
-
+import os
+if os.getenv("ENABLE_BENCH_ROUTES") == "1":
+    from app.bench_routes import router as bench_router
+    app.include_router(bench_router)
 
 # ---------------------------------------------------------------------------
 # Phase 1: temporary hold
@@ -174,10 +177,13 @@ async def confirm_booking(
                 "UPDATE reservations SET status = 'CONFIRMED' WHERE id = $1",
                 req.reservation_id,
             )
-            await conn.execute(
-                "UPDATE events SET available_seats = available_seats - $1 WHERE id = $2",
+            updated = await conn.execute(
+                "UPDATE events SET available_seats = available_seats - $1 "
+                "WHERE id = $2 AND available_seats >= $1",
                 reservation["seats"], reservation["event_id"],
             )
+            if updated != "UPDATE 1":
+                raise HTTPException(statuSs_code=409, detail="Inventory exhausted.")
 
             order_id = uuid.uuid4()
             await conn.execute(

@@ -1,4 +1,4 @@
-# High-Concurrency Reservation Engine
+![CI](https://github.com/IFO45/Reservation-Engine/actions/workflows/ci.yml/badge.svg)
 
 A backend API for flash-sale ticket reservations that never oversells inventory under concurrent load. It combines an atomic in-memory counter (Redis + Lua) with a durable ledger (PostgreSQL), 10-minute seat holds, and idempotent payment confirmation.
 
